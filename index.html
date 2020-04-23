@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Socket stream</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+    />
+  </head>
+  <body>
+    <video id="video" autoplay muted height="400"></video>
+
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4">
+          <div class="form-group">
+            <input
+              type="text"
+              class="form-control text-center"
+              id="peerid"
+              placeholder="Enter partner id"
+            />
+            <button onclick="connect()" class="btn btn-block btn-secondary mt-2">
+              Connect
+            </button>
+            <button onclick="call()" class="btn btn-block btn-primary mt-2">
+              Call
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/peerjs@1.0.0/dist/peerjs.min.js"></script>
+    <script>
+      let getMedia = () => {
+        var vendorUrl = window.URL || window.webkitURL;
+        navigator.getMedia =
+          navigator.getUserMedia ||
+          navigator.webkitGetUserMedia ||
+          navigator.mozGetUserMedia ||
+          navigator.msGetUserMedia;
+
+        navigator.getMedia(
+          {
+            video: true,
+            audio: true,
+          },
+          function (stream) {
+            window.stream = stream;
+          },
+          function (err) {
+            console.log(err);
+          }
+        );
+      };
+
+      getMedia();
+
+      var num = Math.round(Math.random() * 1000).toString();
+      let peerOptions = {
+        host: "localhost",
+        port: 9000,
+        path: "/peerjs/myapp",
+      };
+      const peer = new Peer(peerOptions);
+
+      function call() {
+        var inp = document.getElementById("peerid");
+        console.log(inp.value);
+        peer.connect(inp.value);
+        var call = peer.call(inp.value, window.stream);
+        call.on("stream", function (remoteStream) {
+          // Show stream in some video/canvas element.
+          console.log(remoteStream);
+        });
+      }
+
+      var connection = '';
+      var friend_id = '';
+      peer.on('open', function() {
+        console.log(': ----------------');
+        console.log('peer.id', peer.id);
+        console.log(': ----------------');
+        document.body.append(peer.id);
+      });
+
+      peer.on('connection', function(connection){
+      console.log(': ----------------------');
+      console.log('connection', connection);
+      console.log(': ----------------------');
+        document.getElementById('peerid').value = connection.peer;
+        connection = connection;
+        friend_id = connection.id;
+      })
+
+      // connect
+      function connect() {
+        let id = document.getElementById('peerid').value;
+        if(id) {
+          connection = peer.connect(id);
+
+        } else {
+          alert('Enter an id')
+        }
+      }
+
+      peer.on('error', function(err) {
+        console.log(err);
+      })
+
+      peer.on("call", function (call) {
+        console.log("here", call);
+        if(confirm("Would you like to answer the call?")) {
+          call.answer(window.stream);
+          call.on('stream', function(stream) {
+            document.getElementById('video').srcObject = stream;
+          })
+        }
+        
+      });
+    </script>
+  </body>
+</html>
