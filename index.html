@@ -10,7 +10,6 @@
     />
   </head>
   <body>
-    
     <div class="container mt-5">
       <div class="row">
         <div class="col-md-6 offset-md-3">
@@ -45,7 +44,11 @@
           {
             video: {
               width: 400,
-              height: 300
+              height: 300,
+              frameRate: {
+                ideal: 30,
+                min: 10,
+              },
             },
             audio: true,
           },
@@ -66,7 +69,7 @@
         port: 9000,
         path: "/peerjs/myapp",
       };
-      const peer = new Peer(num, {host: "0.peerjs.com"});
+      const peer = new Peer(num, { host: "0.peerjs.com" });
 
       function call() {
         var inp = document.getElementById("peerid");
@@ -111,7 +114,7 @@
       }
 
       peer.on("error", function (err) {
-        alert(err)
+        alert(err);
         console.log(err);
       });
 
