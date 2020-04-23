@@ -43,7 +43,10 @@
 
         navigator.getMedia(
           {
-            video: true,
+            video: {
+              width: 400,
+              height: 300
+            },
             audio: true,
           },
           function (stream) {
