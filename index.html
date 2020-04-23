@@ -10,21 +10,19 @@
     />
   </head>
   <body>
-    <video id="video" autoplay muted height="400"></video>
-
+    
     <div class="container">
       <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-6 offset-md-3">
           <div class="form-group">
+            <video id="video" autoplay muted height="400"></video>
+            <h2 class="text-center" id="userid"></h2>
             <input
               type="text"
               class="form-control text-center"
               id="peerid"
               placeholder="Enter partner id"
             />
-            <button onclick="connect()" class="btn btn-block btn-secondary mt-2">
-              Connect
-            </button>
             <button onclick="call()" class="btn btn-block btn-primary mt-2">
               Call
             </button>
@@ -61,11 +59,11 @@
 
       var num = Math.round(Math.random() * 1000).toString();
       let peerOptions = {
-        host: "localhost",
+        host: "dry-peak-61142.herokuapp.com",
         port: 9000,
         path: "/peerjs/myapp",
       };
-      const peer = new Peer(peerOptions);
+      const peer = new Peer(num);
 
       function call() {
         var inp = document.getElementById("peerid");
@@ -74,52 +72,54 @@
         var call = peer.call(inp.value, window.stream);
         call.on("stream", function (remoteStream) {
           // Show stream in some video/canvas element.
+          document.getElementById("video").srcObject = remoteStream;
           console.log(remoteStream);
         });
       }
 
-      var connection = '';
-      var friend_id = '';
-      peer.on('open', function() {
-        console.log(': ----------------');
-        console.log('peer.id', peer.id);
-        console.log(': ----------------');
-        document.body.append(peer.id);
+      var connection = "";
+      var friend_id = "";
+      peer.on("open", function () {
+        console.log(": ----------------");
+        console.log("peer.id", peer.id);
+        console.log(": ----------------");
+        const elId = document.getElementById("userid");
+        elId.innerHTML = peer.id;
+        console.log(elId);
       });
 
-      peer.on('connection', function(connection){
-      console.log(': ----------------------');
-      console.log('connection', connection);
-      console.log(': ----------------------');
-        document.getElementById('peerid').value = connection.peer;
+      peer.on("connection", function (connection) {
+        console.log(": ----------------------");
+        console.log("connection", connection);
+        console.log(": ----------------------");
+        document.getElementById("peerid").value = connection.peer;
         connection = connection;
         friend_id = connection.id;
-      })
+      });
 
       // connect
       function connect() {
-        let id = document.getElementById('peerid').value;
-        if(id) {
+        let id = document.getElementById("peerid").value;
+        if (id) {
           connection = peer.connect(id);
-
         } else {
-          alert('Enter an id')
+          alert("Enter an id");
         }
       }
 
-      peer.on('error', function(err) {
+      peer.on("error", function (err) {
+        alert(err)
         console.log(err);
-      })
+      });
 
       peer.on("call", function (call) {
         console.log("here", call);
-        if(confirm("Would you like to answer the call?")) {
+        if (confirm("Would you like to answer the call?")) {
           call.answer(window.stream);
-          call.on('stream', function(stream) {
-            document.getElementById('video').srcObject = stream;
-          })
+          call.on("stream", function (stream) {
+            document.getElementById("video").srcObject = stream;
+          });
         }
-        
       });
     </script>
   </body>
